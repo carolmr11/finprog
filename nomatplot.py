@@ -322,7 +322,7 @@ def Plus():
 #=====================================================================
 #organizing the whole page
 #=====================================================================
-tab1, tab2, tab3, tab4, tab5 = st.tabs(["Summary", "Chart", "Financials", "Montecarlo", "Plus"])
+tab1, tab2, tab3, tab4 = st.tabs(["Summary", "Chart", "Financials","Plus"])
 with tab1:
     summary()
 with tab2:
@@ -330,6 +330,4 @@ with tab2:
 with tab3:
     Financials()
 with tab4:
-    Montecarlo()
-with tab5:
     Plus()
