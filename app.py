@@ -4,9 +4,9 @@
 import streamlit as st
 import numpy as np                        # Array, Calculation
 import pandas as pd                       # DataFrame
-import matplotlib.pyplot as plt           # Visualization
-import plotly.express as px               # Visualization
-import plotly.graph_objects as go         # Visualization
+from matplotlib import pyplot as plt           # Visualization
+from plotly import express as px               # Visualization
+from plotly import graph_objects as go         # Visualization
 from datetime import datetime, timedelta  # Date-time
 import yfinance as yf
 #==============================================================================
@@ -211,7 +211,7 @@ def candlechart():
         df = getdata(ticker, start_date, end_date)
         fig = make_subplots(specs=[[{"secondary_y":False}]])  
         fig.add_trace(go.Candlestick(x=df["Date"], open=df['Open'], high=df['High'], low=df['Low'], close=df['Close'], showlegend=False))
-        fig.update_layout(title=f'{ticker} Stock Price', xaxis_title='Time', yaxis_title='Stock Price', showlegend=False, xaxis=dict(rangeselector=dict(buttons=buttoms_f)))
+        fig.update_layout(title=f'{ticker} Stock Price', xaxis_title='Time', yaxis_title='Stock Price', showlegend=False, xaxis=dict(rangeselector=dict(buttons=buttoms_f)), xaxis_rangeslider_visible=False)
         return fig
 #================================================================
 #organizing information for the chart page
