@@ -171,10 +171,9 @@ def createsct(ticker, start_date, end_date):
             {'count': 5, 'label': "5Y", 'step': 'year', 'stepmode': 'backward'},
             {'step': 'all'}]
     df = getdata(ticker, start_date, end_date)
-    fig = make_subplots(specs=[[{"secondary_y":True}]])
-    fig.add_trace(go.Scatter(x=df['Date'], y=df['Close'], fill='tozeroy', fillcolor='rgba(133,133,241,0.2)', showlegend=False), secondary_y=True)
+    fig = make_subplots(specs=[[{"secondary_y":False}]])
+    fig.add_trace(go.Scatter(x=df['Date'], y=df['Close'], fill='tozeroy', fillcolor='rgba(133,133,241,0.2)', showlegend=False), secondary_y=False)
     fig.update_layout(title=f'{ticker} Historical Stock Price', xaxis_title='Time', yaxis_title='Stock Price (USD)', showlegend=False, xaxis=dict(rangeselector=dict(buttons=buttoms_f)))
-    fig.update_yaxes(range=[0,1000000000], secondary_y=False, showticklabels=False)
     return fig
 #================================================================
 #organize programing in the summary page
@@ -209,9 +208,11 @@ def candlechart():
             {'count': 5, 'label': "5Y", 'step': 'year', 'stepmode': 'backward'},
             {'step': 'all'}]
         df = getdata(ticker, start_date, end_date)
-        fig = make_subplots(specs=[[{"secondary_y":False}]])  
-        fig.add_trace(go.Candlestick(x=df["Date"], open=df['Open'], high=df['High'], low=df['Low'], close=df['Close'], showlegend=False))
+        fig = make_subplots(specs=[[{"secondary_y":True}]])  
+        fig.add_trace(go.Candlestick(x=df["Date"], open=df['Open'], high=df['High'], low=df['Low'], close=df['Close'], showlegend=False), secondary_y=True)
+        fig.add_trace(go.Bar(x=df["Date"], y=df['Volume'],marker_color=np.where(df['Close'].pct_change() > 0, 'green', 'red')))
         fig.update_layout(title=f'{ticker} Stock Price', xaxis_title='Time', yaxis_title='Stock Price', showlegend=False, xaxis=dict(rangeselector=dict(buttons=buttoms_f)), xaxis_rangeslider_visible=False)
+        fig.update_yaxes(range=[0,100000000], secondary_y=False, showticklabels=False)
         return fig
 #================================================================
 #organizing information for the chart page
@@ -250,26 +251,29 @@ def finstate(ticker, financial, period):
 #=====================================================================
 def Financials():
     st.write('You can find the different Financial Statements of each one of the S&P500 companies')
+    col1, col2 = st.columns(2)
     def balance_sheet_anual():
         st.subheader("Anual Balance Sheet")
-        st.write(finstate(ticker, 'balance_sheet', "anual"))
+        st.dataframe(finstate(ticker, 'balance_sheet', "anual"))
     def balance_sheet_quarter():
         st.subheader("Quarter Balance Sheet")
-        st.write(finstate(ticker, 'balance_sheet', "quarter"))
+        st.dataframe(finstate(ticker, 'balance_sheet', "quarter"))
     def income_statement_anual():
         st.subheader("Anual Income Statement")
-        st.write(finstate(ticker, 'income_statement', "anual"))
+        st.dataframe(finstate(ticker, 'income_statement', "anual"))
     def income_statetment_quarter():
         st.subheader("Quarter Income Statement")
-        st.write(finstate(ticker, 'income_statement', "quarter"))
+        st.dataframe(finstate(ticker, 'income_statement', "quarter"))
     def cashflow_anual():
         st.subheader("Anual Cash Flow")
-        st.write(finstate(ticker, 'cashflow', "anual"))
+        st.dataframe(finstate(ticker, 'cashflow', "anual"))
     def cashflow_quarter():
         st.subheader("Quarter Cash Flow")
-        st.write(finstate(ticker, 'cashflow', "quarter"))
-    report = st.radio(label="",options=["Balance Sheet", "Income Statement", "Cash Flow"])
-    period = st.radio(label="",options=["anual", "quarter"])
+        st.dataframe(finstate(ticker, 'cashflow', "quarter"))
+    with col1:
+        report = st.radio(label="Select a Financial Statement",options=["Balance Sheet", "Income Statement", "Cash Flow"])
+    with col2:
+        period = st.radio(label="Select a Period",options=["anual", "quarter"])
     if report == "Balance Sheet" and period == "anual":
         balance_sheet_anual()
     elif report == "Balance Sheet" and period == "quarter":
