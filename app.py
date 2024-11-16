@@ -111,13 +111,13 @@ class YFinance:
 #===============================================================================
 #Here you can find the home page where people can find the title and choose the features needed
 st.title("S&P500 PERFORMANCE")
-col1, col2 = st.columns((1,5))
+col1, col2, col4 = st.columns((1,5, 1))
 col1.write("Data Source:")
 col2.image('Yfinancelogo.jpeg', width=100)
 tlist = pd.read_html('https://en.wikipedia.org/wiki/List_of_S%26P_500_companies')[0]['Symbol']
 col1, col2, col3 = st.columns(3)
 ticker = col1.selectbox("Ticker", tlist)
-start_date = col2.date_input("Start date", datetime.today().date() - timedelta(days=30))
+start_date = col2.date_input("Start date", datetime.today().date() - timedelta(days=10*365))
 end_date = col3.date_input("End date", datetime.today().date())
 #===============================================================================
 #programing for the summary page
@@ -161,6 +161,8 @@ def getdata(ticker, start_date, end_date):
     stock.reset_index(inplace=True)
     stock['Date'] = stock['Date'].dt.date
     return stock
+if col4.button('UPDATE'):
+    getdata(ticker, start_date, end_date)
 #creating chart for summary
 def createsct(ticker, start_date, end_date):
     from plotly.subplots import make_subplots
@@ -193,8 +195,10 @@ def sctbarchart():
             {'count': 5, 'label': "5Y", 'step': 'year', 'stepmode': 'backward'},
             {'step': 'all'}]
         df = getdata(ticker, start_date, end_date)
+        df['MA'] = df["Close"].rolling(window=50).mean()
         fig = make_subplots(specs=[[{"secondary_y":True}]])
-        fig.add_trace(go.Scatter(x=df["Date"], y=df['Close'], fill='tozeroy', fillcolor='rgba(133,133,241,0.2)', showlegend=False), secondary_y=True)
+        fig.add_trace(go.Scatter(x=df["Date"], y=df['Close'], name='Stock Close Price', fill='tozeroy', fillcolor='rgba(133,133,241,0.2)', showlegend=False), secondary_y=True)
+        fig.add_trace(go.Scatter(x=df["Date"], y=df['MA'], name='Moving Average', line=dict(color="black", dash="dot"), showlegend=False), secondary_y=True)
         fig.add_trace(go.Bar(x=df["Date"], y=df['Volume'],marker_color=np.where(df['Close'].pct_change() > 0, 'green', 'red')))
         fig.update_layout(title=f'{ticker} Stock Price', xaxis_title='Time', yaxis_title='Stock Price (USD)', showlegend=False,xaxis=dict(rangeselector=dict(buttons=buttoms_f)))
         fig.update_yaxes(range=[0,100000000], secondary_y=False, showticklabels=False)
@@ -208,10 +212,12 @@ def candlechart():
             {'count': 5, 'label': "5Y", 'step': 'year', 'stepmode': 'backward'},
             {'step': 'all'}]
         df = getdata(ticker, start_date, end_date)
-        fig = make_subplots(specs=[[{"secondary_y":True}]])  
+        df['MA'] = df["Close"].rolling(window=50).mean()
+        fig = make_subplots(specs=[[{"secondary_y":True}]])
+        fig.add_trace(go.Scatter(x=df["Date"], y=df['MA'], name='Moving Average', line=dict(color="black", dash="dot"), showlegend=False), secondary_y=True)  
         fig.add_trace(go.Candlestick(x=df["Date"], open=df['Open'], high=df['High'], low=df['Low'], close=df['Close'], showlegend=False), secondary_y=True)
         fig.add_trace(go.Bar(x=df["Date"], y=df['Volume'],marker_color=np.where(df['Close'].pct_change() > 0, 'green', 'red')))
-        fig.update_layout(title=f'{ticker} Stock Price', xaxis_title='Time', yaxis_title='Stock Price', showlegend=False, xaxis=dict(rangeselector=dict(buttons=buttoms_f)), xaxis_rangeslider_visible=False)
+        fig.update_layout(title=f'{ticker} Stock Price', xaxis_title='Time', yaxis_title='Stock Price (USD)', showlegend=False, xaxis=dict(rangeselector=dict(buttons=buttoms_f)), xaxis_rangeslider_visible=False)
         fig.update_yaxes(range=[0,100000000], secondary_y=False, showticklabels=False)
         return fig
 #================================================================
@@ -250,7 +256,7 @@ def finstate(ticker, financial, period):
 #organizing information of financial statement
 #=====================================================================
 def Financials():
-    st.write('You can find the different Financial Statements of each one of the S&P500 companies')
+    st.write(f'You can find the different Financial Statements of {ticker} company')
     col1, col2 = st.columns(2)
     def balance_sheet_anual():
         st.subheader("Anual Balance Sheet")
@@ -369,6 +375,8 @@ def value_at_risk(stock_price, simulation_df):
 #organizing information of montecarlo statement
 #=====================================================================
 def Montecarlo():
+    st.subheader(f"Montecarlo Simulation of {ticker}")
+    st.write(f"Here you can run the montecarlo simulation of the {ticker} company selecting the time horizon in days and the number of simulations")
     col1, col2 = st.columns(2)
     time_horizon= col1.selectbox("Time Horizon",[30, 60, 90])
     n_simulation = col2.selectbox("Number of Simulations", [200, 500, 1000])
@@ -409,7 +417,9 @@ def insights(ticker1, ticker2):
 #organizing information of plus statement
 #=====================================================================
 def Plus():
+    st.subheader('Here you can compare some insights between two S&P500 companies')
     ticker2 = st.selectbox("Select a company to compare", tlist)
+    st.subheader(f'Comparison between {ticker} and {ticker2}')
     st.dataframe(insights(ticker, ticker2))
 #=====================================================================
 #organizing the whole page
