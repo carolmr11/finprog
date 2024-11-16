@@ -120,7 +120,7 @@ ticker = col1.selectbox("Ticker", tlist)
 start_date = col2.date_input("Start date", datetime.today().date() - timedelta(days=10*365))
 end_date = col3.date_input("End date", datetime.today().date())
 #===============================================================================
-#programing for the summary page
+#programing for the summary page, based on the class excercises
 #===============================================================================
 def sumup(ticker):
     # Get the company information
@@ -184,7 +184,7 @@ def summary():
     st.title("Summary and Historical Prices")
     st.write(sumup(ticker), createsct(ticker, start_date, end_date))
 #================================================================
-#programing the chart page
+#programing the chart page, code based on the class execises
 #================================================================
 def sctbarchart():
         from plotly.subplots import make_subplots
@@ -293,7 +293,7 @@ def Financials():
     elif report == "Cash Flow" and period == "quarter":
         cashflow_quarter()
 #=====================================================================
-#Programming montecarlo statement #taken from class execises
+#Programming montecarlo statement code based in class execises
 #=====================================================================
 stock_price = getdata(ticker, start_date, end_date)
 seed = 10
